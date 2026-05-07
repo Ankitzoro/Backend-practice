@@ -2,7 +2,7 @@ const Todo = require('../models/Todo.model')
 
 const getAllTodos = async (req, res) => {
     try{
-        const todos = await Todo.find()
+        const todos = await Todo.find({ owner: req.user })
         res.json(todos);
     } catch (error) {
         res.status(500).json({
@@ -11,17 +11,18 @@ const getAllTodos = async (req, res) => {
     }
 }
 
-const createTodo = async (req,res) => {
+const createTodo = async (req, res) => {
     try {
         const newTodo = new Todo({
-            task: req.body.task
-        })
-        const savedTodo = await newTodo.save();
-        res.status(201).json(savedTodo);
+            task: req.body.task,
+            owner: req.user // This comes from the 'protect' middleware!
+        });
+        await newTodo.save();
+        res.status(201).json(newTodo);
     } catch (error) {
-        res.status(400).json({ message: error.message })
+        res.status(400).json({ error: error.message });
     }
-}
+};
 
 const deleteTodo = async(req, res) => {
 
